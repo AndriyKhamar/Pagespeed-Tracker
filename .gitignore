@@ -3,3 +3,5 @@ node_modules/
 *.log
 dashboard/.angular/
 dashboard/node_modules/
+dashboard/dist/
+docs/browser/
