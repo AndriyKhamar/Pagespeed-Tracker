@@ -1,0 +1,13 @@
+{
+  "url": "https://xq-booking-uat.newshore.es/",
+  "slug": "xq-booking-uat-newshore-es",
+  "updatedAt": null,
+  "series": {
+    "mobile": [],
+    "desktop": []
+  },
+  "thresholds": {
+    "mobile": 50,
+    "desktop": 66
+  }
+}
