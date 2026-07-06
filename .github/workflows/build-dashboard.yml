@@ -1,0 +1,45 @@
+name: build-dashboard
+on:
+  push:
+    branches: [main]
+    paths: ['dashboard/**', '.github/workflows/build-dashboard.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect          # share group with collect.yml to avoid push races
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build Angular
+        working-directory: dashboard
+        run: |
+          npm ci
+          npx ng build --configuration production
+      - name: Flatten browser/ into docs root
+        run: |
+          # Angular outputs to docs/browser; move to docs root, keep docs/data + .nojekyll
+          rsync -a --remove-source-files docs/browser/ docs/
+          rm -rf docs/browser
+          touch docs/.nojekyll
+      - name: Commit built bundle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain docs)" ]; then
+            git add docs
+            git commit -m "build: dashboard bundle"
+            git pull --rebase --autostash origin main
+            git push
+          else
+            echo "No changes"
+          fi
