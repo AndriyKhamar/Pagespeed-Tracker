@@ -29,7 +29,7 @@ export class UrlListComponent implements OnInit {
       for (const slug of idx.slugs) this.data.getSummary(slug).subscribe((s) => this.summaries.push(s));
     });
   }
-  last(s: SummaryFile, strat: 'mobile' | 'desktop') { const a = s.series[strat]; return a[a.length - 1]; }
+  last(s: SummaryFile, strat: 'mobile' | 'desktop'): SeriesPoint | undefined { const a = s.series[strat]; return a[a.length - 1]; }
   badge(s: SummaryFile, strat: 'mobile' | 'desktop') {
     return { up: '▲', down: '▼', flat: '—' }[UrlListComponent.trendOf(s.series[strat])];
   }
