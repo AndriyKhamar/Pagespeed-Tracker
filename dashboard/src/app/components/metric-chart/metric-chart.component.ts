@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { SeriesPoint } from '../../models/psi.model';
 
@@ -9,7 +9,7 @@ Chart.register(...registerables);
   standalone: true,
   template: `<div style="position:relative;height:260px"><canvas #canvas></canvas></div>`
 })
-export class MetricChartComponent implements AfterViewInit, OnChanges {
+export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() title = '';
   @Input() metric: 'score' | 'lcp' | 'cls' | 'tbt' = 'score';
   @Input() mobile: SeriesPoint[] = [];
@@ -19,6 +19,7 @@ export class MetricChartComponent implements AfterViewInit, OnChanges {
 
   ngAfterViewInit() { this.render(); }
   ngOnChanges() { if (this.canvas) this.render(); }
+  ngOnDestroy() { this.chart?.destroy(); }
 
   private line(points: SeriesPoint[]) {
     return points.map((p) => ({ x: p.t, y: (p as any)[this.metric] as number }));
