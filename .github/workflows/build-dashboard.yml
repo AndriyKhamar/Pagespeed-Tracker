@@ -31,6 +31,10 @@ jobs:
           rsync -a --remove-source-files docs/browser/ docs/
           rm -rf docs/browser
           touch docs/.nojekyll
+          # SPA fallback: GitHub Pages has no rewrite, so a hard reload/bookmark
+          # of /url/:slug would 404. Serving index.html as 404.html lets the
+          # Angular router handle deep links.
+          cp docs/index.html docs/404.html
       - name: Commit built bundle
         run: |
           git config user.name "github-actions[bot]"

@@ -32,7 +32,7 @@ across runs.
 - Frequency: hourly (single global cron; per-URL frequency is out of scope — YAGNI).
 - PSI: **unauthenticated** (no API key). Accepted risk: shared-runner IP rate
   limits; mitigated by retry/backoff and skip-on-failure.
-- Alert recipient (deferred): andriy.khamar@flyr.com via Gmail SMTP.
+- Alert recipient (deferred): configured via repo secret, sent via Gmail SMTP.
 - Slack: not configured; plumbing prepared, not wired.
 
 ## Architecture

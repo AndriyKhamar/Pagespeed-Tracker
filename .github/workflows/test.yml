@@ -1,6 +1,7 @@
 name: test
 on:
   push:
+    paths-ignore: ['docs/data/**']   # skip hourly bot data commits
   pull_request:
 
 jobs:
