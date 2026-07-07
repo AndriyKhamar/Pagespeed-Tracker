@@ -1,0 +1,6 @@
+{
+  "urls": [
+    { "url": "https://xq-booking-uat.newshore.es/" }
+  ],
+  "thresholds": { "mobile": 50, "desktop": 66 }
+}

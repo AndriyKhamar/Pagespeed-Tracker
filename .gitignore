@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.log
+dashboard/.angular/
+dashboard/node_modules/
+dashboard/dist/
+docs/browser/
