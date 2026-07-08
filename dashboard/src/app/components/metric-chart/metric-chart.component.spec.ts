@@ -43,7 +43,7 @@ describe('MetricChartComponent', () => {
     const fixture = TestBed.createComponent(MetricChartComponent);
     fixture.componentRef.setInput('metric', 'lcp');
     fixture.componentRef.setInput('mobile', [{ t: '2026-07-06T14:00:00Z', score: 47, lcp: 1, cls: 0, tbt: 1 }]);
-    fixture.componentRef.setInput('desktop', []);
+    fixture.componentRef.setInput('desktop', [{ t: '2026-07-06T14:00:00Z', score: 88, lcp: 1, cls: 0, tbt: 1 }]);
     fixture.componentRef.setInput('thresholds', { mobile: 50, desktop: 66 });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('target');
