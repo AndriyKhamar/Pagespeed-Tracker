@@ -5,3 +5,5 @@ dashboard/.angular/
 dashboard/node_modules/
 dashboard/dist/
 docs/browser/
+.superpowers/
+dashboard/public/data/

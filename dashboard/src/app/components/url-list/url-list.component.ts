@@ -11,7 +11,7 @@ import { statusStyle } from '../../shared/status-style';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="page">
-      <h1 style="font-size:20px;margin-bottom:16px;color:#1a1a2e;">Monitored URLs</h1>
+      <h1 style="font-size:20px;margin-bottom:16px;color:#1a1a2e;">Monitored Environments</h1>
       <div *ngFor="let s of summaries" style="margin-bottom:16px;">
         <div style="background:#fff;border:1px solid #d7dbe4;border-radius:999px;padding:10px 12px 10px 22px;display:flex;align-items:center;gap:20px;max-width:520px;box-shadow:0 4px 14px rgba(30,40,80,.12);">
           <div style="flex:1;min-width:0;">
