@@ -1,10 +1,26 @@
 {
   "url": "https://xq-booking-uat.newshore.es/",
   "slug": "xq-booking-uat-newshore-es",
-  "updatedAt": null,
+  "updatedAt": "2026-07-08T10:17:41Z",
   "series": {
-    "mobile": [],
-    "desktop": []
+    "mobile": [
+      {
+        "t": "2026-07-08T10:17:41Z",
+        "score": 47,
+        "lcp": 6423.171654466769,
+        "cls": 0,
+        "tbt": 478
+      }
+    ],
+    "desktop": [
+      {
+        "t": "2026-07-08T10:17:41Z",
+        "score": 29,
+        "lcp": 8917.832356555977,
+        "cls": 0,
+        "tbt": 4649.161344449993
+      }
+    ]
   },
   "thresholds": {
     "mobile": 50,
