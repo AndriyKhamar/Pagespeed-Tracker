@@ -1,0 +1,27 @@
+<div class="page">
+  <h1 class="title">Monitored Environments</h1>
+  <div class="card-wrap" *ngFor="let s of summaries">
+    <div class="card">
+      <div class="card-info">
+        <div class="card-name">{{ titleFor(s) }}</div>
+        <div class="card-url">{{ s.url }}</div>
+      </div>
+      <div class="card-score">
+        <div class="card-score-row">
+          <span class="card-score-value" [style.color]="scoreColor(s, 'mobile')">{{ last(s, 'mobile')?.score ?? '—' }}</span>
+          <span class="card-score-trend">{{ badge(s, 'mobile') }}</span>
+        </div>
+        <div class="card-score-label">📱 mobile</div>
+      </div>
+      <div class="card-score">
+        <div class="card-score-row">
+          <span class="card-score-value" [style.color]="scoreColor(s, 'desktop')">{{ last(s, 'desktop')?.score ?? '—' }}</span>
+          <span class="card-score-trend">{{ badge(s, 'desktop') }}</span>
+        </div>
+        <div class="card-score-label">🖥️ desktop</div>
+      </div>
+      <a class="details-btn" [routerLink]="['/url', s.slug]">Details →</a>
+    </div>
+  </div>
+  <p *ngIf="summaries.length === 0">No data yet.</p>
+</div>

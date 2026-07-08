@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, AfterViewInit, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { SeriesPoint, Thresholds } from '../../models/psi.model';
@@ -27,26 +27,8 @@ export function metricCaption(metric: MetricKey): string { return CAPTIONS[metri
   selector: 'app-metric-chart',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div style="background:#fff;border:1px solid #e2e5ea;border-radius:14px;padding:20px 24px;box-shadow:0 2px 8px rgba(30,40,80,.06);">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <div style="font-weight:700;font-size:15px;color:#1a1a2e;">{{ chartTitle(metric) }}</div>
-        <div style="font-size:11px;color:#8a8f98;">data collected hourly</div>
-      </div>
-      <div style="position:relative;height:220px;margin-top:10px;"><canvas #canvas></canvas></div>
-      <div style="display:flex;gap:16px;font-size:12px;color:#5a5f6a;margin-top:8px;flex-wrap:wrap;">
-        <span><span style="display:inline-block;width:10px;height:10px;background:#e8710a;border-radius:2px;margin-right:4px;"></span>mobile</span>
-        <span><span style="display:inline-block;width:10px;height:10px;background:#1a73e8;border-radius:2px;margin-right:4px;"></span>desktop</span>
-        <span *ngIf="metric === 'score' && thresholds">
-          <svg width="16" height="10" style="vertical-align:middle;margin-right:4px;"><line x1="0" y1="5" x2="16" y2="5" stroke="#e8710a" stroke-dasharray="4,3" stroke-width="1.5"></line></svg>mobile target ({{ thresholds.mobile }})
-        </span>
-        <span *ngIf="metric === 'score' && thresholds">
-          <svg width="16" height="10" style="vertical-align:middle;margin-right:4px;"><line x1="0" y1="5" x2="16" y2="5" stroke="#1a73e8" stroke-dasharray="4,3" stroke-width="1.5"></line></svg>desktop target ({{ thresholds.desktop }})
-        </span>
-      </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eef0f4;font-size:12px;color:#5a5f6a;line-height:1.5;">{{ metricCaption(metric) }}</div>
-    </div>
-  `
+  templateUrl: './metric-chart.component.html',
+  styleUrl: './metric-chart.component.scss'
 })
 export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() metric: MetricKey = 'score';
@@ -59,40 +41,108 @@ export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy
   chartTitle = chartTitle;
   metricCaption = metricCaption;
 
-  ngAfterViewInit() { this.render(); }
-  ngOnChanges() { if (this.canvas) this.render(); }
-  ngOnDestroy() { this.chart?.destroy(); }
+  private zone = inject(NgZone);
+  private resizeTimer: ReturnType<typeof setTimeout> | undefined;
 
-  private line(points: SeriesPoint[]) {
-    return points.map((p) => ({ x: p.t, y: (p as any)[this.metric] as number }));
+  ngAfterViewInit() {
+    this.render();
+    // One shared window listener instead of Chart.js's per-instance ResizeObserver
+    // (which loops when it measures an unstable container). Outside Angular's zone so
+    // it doesn't trigger change detection.
+    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResize));
+  }
+  ngOnChanges() { if (this.canvas) this.render(); }
+  ngOnDestroy() {
+    this.chart?.destroy();
+    window.removeEventListener('resize', this.onResize);
+    clearTimeout(this.resizeTimer);
   }
 
-  private thresholdLine(points: SeriesPoint[], value: number) {
-    return points.map((p) => ({ x: p.t, y: value }));
+  private onResize = () => {
+    clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => this.fit(), 150);
+  };
+
+  private fit() {
+    const parent = this.canvas?.nativeElement.parentElement;
+    if (this.chart && parent) this.chart.resize(parent.clientWidth, parent.clientHeight);
+  }
+
+  // Points as {x: epoch ms, y} so the x-axis is a real time axis (fixed window, gaps shown).
+  private line(points: SeriesPoint[]) {
+    return points
+      .filter((p) => (p as any)[this.metric] != null)
+      .map((p) => ({ x: new Date(p.t).getTime(), y: (p as any)[this.metric] as number }));
+  }
+
+  private yScaleBounds(mobileLine: { y: number }[], desktopLine: { y: number }[]) {
+    if (this.metric === 'score') return { min: 0, max: 100 };
+    // Chart.js's auto-range hangs computing ticks when min === max (e.g. CLS staying at 0
+    // across every point) — give it an explicit non-zero range in that case.
+    const values = [...mobileLine, ...desktopLine].map((d) => d.y);
+    if (values.length === 0) return {};
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (min !== max) return {};
+    return { min: 0, max: max === 0 ? 1 : max * 1.2 };
   }
 
   private render() {
+    const mobileLine = this.line(this.mobile);
+    const desktopLine = this.line(this.desktop);
+    // Fixed trailing window so sparse data shows in context, empty space where no data yet.
+    const winEnd = Date.now();
+    const winStart = winEnd - WINDOW_DAYS * 24 * 60 * 60 * 1000;
     const datasets: any[] = [
-      { label: 'mobile', data: this.line(this.mobile), borderColor: '#e8710a', tension: 0.2 },
-      { label: 'desktop', data: this.line(this.desktop), borderColor: '#1a73e8', tension: 0.2 }
+      { label: 'mobile', data: mobileLine, borderColor: '#e8710a', backgroundColor: 'rgba(232,113,10,0.08)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
+      { label: 'desktop', data: desktopLine, borderColor: '#1a73e8', backgroundColor: 'rgba(26,115,232,0.08)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }
     ];
     if (this.metric === 'score' && this.thresholds) {
-      if (this.mobile.length) datasets.push({ data: this.thresholdLine(this.mobile, this.thresholds.mobile), borderColor: '#e8710a', borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0 });
-      if (this.desktop.length) datasets.push({ data: this.thresholdLine(this.desktop, this.thresholds.desktop), borderColor: '#1a73e8', borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0 });
+      const span = (value: number) => [{ x: winStart, y: value }, { x: winEnd, y: value }];
+      if (this.mobile.length) datasets.push({ label: 'mobile target', data: span(this.thresholds.mobile), borderColor: '#e8710a', borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 0, fill: false });
+      if (this.desktop.length) datasets.push({ label: 'desktop target', data: span(this.thresholds.desktop), borderColor: '#1a73e8', borderDash: [6, 5], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 0, fill: false });
     }
     const cfg: ChartConfiguration = {
       type: 'line',
       data: { datasets },
       options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { title: { display: false }, legend: { display: false } },
+        // responsive:false → no Chart.js ResizeObserver (its per-instance observer loops
+        // when it measures an unstable container). We size the canvas ourselves via fit().
+        responsive: false, animation: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          title: { display: false }, legend: { display: false },
+          tooltip: { callbacks: { title: (items) => fullStamp(items[0]?.parsed?.x) } }
+        },
         scales: {
-          x: { type: 'category', grid: { display: false } },
-          y: { grid: { color: '#eef0f4' }, ...(this.metric === 'score' ? { min: 0, max: 100 } : {}) }
+          x: {
+            type: 'linear',
+            min: winStart, max: winEnd,
+            grid: { display: false },
+            ticks: {
+              maxTicksLimit: 8, maxRotation: 0,
+              callback: (value) => dayLabel(value as number)
+            }
+          },
+          y: { grid: { color: '#eef0f4' }, ...this.yScaleBounds(mobileLine, desktopLine) }
         }
       }
     };
     this.chart?.destroy();
     this.chart = new Chart(this.canvas.nativeElement, cfg);
+    this.fit();
   }
+}
+
+const WINDOW_DAYS = 15;
+
+function dayLabel(epochMs: number): string {
+  const d = new Date(epochMs);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function fullStamp(epochMs?: number | null): string {
+  if (epochMs == null) return '';
+  const d = new Date(epochMs);
+  return isNaN(d.getTime()) ? '' : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }

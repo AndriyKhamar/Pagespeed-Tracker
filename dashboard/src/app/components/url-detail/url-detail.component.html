@@ -1,0 +1,40 @@
+<div class="page">
+  <a class="back-link" routerLink="/">← Back to all URLs</a>
+  <ng-container *ngIf="summary as s">
+    <h1 class="title">{{ s.label || s.url }}</h1>
+    <p class="subtitle">{{ s.url }} · updated {{ s.updatedAt || '—' }}</p>
+
+    <div class="cards">
+      <div class="card" *ngFor="let strat of strategies"
+           [class.card-inactive]="!visible[strat]"
+           (click)="toggle(strat)"
+           role="button"
+           [attr.aria-pressed]="visible[strat]">
+        <ng-container *ngIf="cardData(s, strat) as c">
+          <div class="card-header">
+            <div class="ring" [style.background]="c.gradient">
+              <div class="ring-value" [style.color]="c.color">{{ c.score ?? '—' }}</div>
+            </div>
+            <div>
+              <div class="strategy-label">{{ strat === 'mobile' ? '📱 MOBILE' : '🖥️ DESKTOP' }}</div>
+              <span class="target-badge" [style.background]="c.bg" [style.color]="c.color">target {{ c.threshold }}</span>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric-cell" *ngFor="let m of c.metrics">
+              <div class="metric-label">{{ m.label }}</div>
+              <div class="metric-value">{{ m.value }}</div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <p class="hint">Tap a card to show or hide that device in the charts below.</p>
+
+    <div class="charts">
+      <app-metric-chart metric="score" [mobile]="mobileSeries" [desktop]="desktopSeries" [thresholds]="s.thresholds"></app-metric-chart>
+      <app-metric-chart *ngFor="let m of rawMetrics" [metric]="m.key" [mobile]="mobileSeries" [desktop]="desktopSeries"></app-metric-chart>
+    </div>
+  </ng-container>
+</div>

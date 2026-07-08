@@ -1,0 +1,18 @@
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-title">{{ chartTitle(metric) }}</div>
+    <div class="chart-note">data collected hourly</div>
+  </div>
+  <div class="chart-canvas-wrap"><canvas #canvas></canvas></div>
+  <div class="chart-legend">
+    <span *ngIf="mobile.length"><span class="swatch swatch-mobile"></span>mobile</span>
+    <span *ngIf="desktop.length"><span class="swatch swatch-desktop"></span>desktop</span>
+    <span *ngIf="metric === 'score' && thresholds && mobile.length">
+      <svg width="16" height="10" class="dash dash-mobile"><line x1="0" y1="5" x2="16" y2="5"></line></svg>mobile target ({{ thresholds.mobile }})
+    </span>
+    <span *ngIf="metric === 'score' && thresholds && desktop.length">
+      <svg width="16" height="10" class="dash dash-desktop"><line x1="0" y1="5" x2="16" y2="5"></line></svg>desktop target ({{ thresholds.desktop }})
+    </span>
+  </div>
+  <div class="chart-caption">{{ metricCaption(metric) }}</div>
+</div>

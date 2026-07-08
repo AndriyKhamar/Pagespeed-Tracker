@@ -54,6 +54,43 @@ describe('MetricChartComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('desktop target (66)');
   });
 
+  it('drops points missing the current metric instead of feeding Chart.js an undefined y-value', () => {
+    TestBed.configureTestingModule({ imports: [MetricChartComponent] });
+    const fixture = TestBed.createComponent(MetricChartComponent);
+    fixture.componentRef.setInput('metric', 'fcp');
+    fixture.componentRef.setInput('mobile', [
+      { t: '2026-07-08T10:00:00Z', score: 47, lcp: 6423, cls: 0, tbt: 478 }, // old data point, no fcp
+      { t: '2026-07-08T12:00:00Z', score: 54, fcp: 4585, lcp: 11002, tbt: 193, cls: 0, si: 10773 }
+    ]);
+    fixture.componentRef.setInput('desktop', []);
+    fixture.detectChanges();
+
+    const chart = (fixture.componentInstance as any).chart;
+    expect(chart.data.datasets[0].data).toEqual([{ x: new Date('2026-07-08T12:00:00Z').getTime(), y: 4585 }]);
+  });
+
+  it('gives the y-axis a non-zero range when every value is identical (e.g. CLS stuck at 0)', () => {
+    TestBed.configureTestingModule({ imports: [MetricChartComponent] });
+    const fixture = TestBed.createComponent(MetricChartComponent);
+    fixture.componentRef.setInput('metric', 'cls');
+    fixture.componentRef.setInput('mobile', [
+      { t: '2026-07-08T10:00:00Z', score: 47, lcp: 6423, cls: 0, tbt: 478 },
+      { t: '2026-07-08T12:00:00Z', score: 54, lcp: 11002, cls: 0, tbt: 193 }
+    ]);
+    fixture.componentRef.setInput('desktop', [
+      { t: '2026-07-08T10:00:00Z', score: 29, lcp: 8917, cls: 0, tbt: 4649 },
+      { t: '2026-07-08T12:00:00Z', score: 66, lcp: 3478, cls: 0, tbt: 207 }
+    ]);
+
+    const start = Date.now();
+    fixture.detectChanges();
+    expect(Date.now() - start).toBeLessThan(1000);
+
+    const chart = (fixture.componentInstance as any).chart;
+    expect(chart.options.scales!['y'].min).toBe(0);
+    expect(chart.options.scales!['y'].max).toBe(1);
+  });
+
   it('destroys the chart instance on component teardown', () => {
     TestBed.configureTestingModule({ imports: [MetricChartComponent] });
     const fixture = TestBed.createComponent(MetricChartComponent);
