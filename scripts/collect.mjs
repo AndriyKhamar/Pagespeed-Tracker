@@ -28,12 +28,13 @@ async function main() {
   const start = windowStart(now);
   const slugs = [];
 
-  for (const { url } of cfg.urls) {
+  for (const { url, label } of cfg.urls) {
     const slug = slugify(url);
     slugs.push(slug);
     const summaryPath = join(dataDir, 'summary', `${slug}.json`);
-    const summary = await readJson(summaryPath, emptySummary(url, slug, cfg.thresholds));
+    const summary = await readJson(summaryPath, emptySummary(url, slug, cfg.thresholds, label ?? null));
     summary.thresholds = cfg.thresholds;
+    summary.label = label ?? null;
 
     for (const strategy of STRATEGIES) {
       try {

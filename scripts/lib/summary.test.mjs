@@ -7,16 +7,24 @@ const run = {
   score: 47, metrics: { lcp: 4200, cls: 0.12, tbt: 890, fcp: 2100, si: 5300 }
 };
 
-test('emptySummary shape', () => {
+test('emptySummary shape defaults label to null', () => {
   const s = emptySummary('https://a.com/', 'a-com', { mobile: 50, desktop: 66 });
   assert.deepEqual(s.series, { mobile: [], desktop: [] });
   assert.equal(s.thresholds.desktop, 66);
+  assert.equal(s.label, null);
 });
 
-test('appendPoint adds compact point to correct strategy', () => {
+test('emptySummary accepts a label', () => {
+  const s = emptySummary('https://a.com/', 'a-com', { mobile: 50, desktop: 66 }, 'UAT Environment');
+  assert.equal(s.label, 'UAT Environment');
+});
+
+test('appendPoint stores all 5 metrics per point', () => {
   const s = appendPoint(emptySummary('https://a.com/', 'a-com', { mobile: 50, desktop: 66 }), run);
   assert.equal(s.series.mobile.length, 1);
-  assert.deepEqual(s.series.mobile[0], { t: '2026-07-06T14:00:00Z', score: 47, lcp: 4200, cls: 0.12, tbt: 890 });
+  assert.deepEqual(s.series.mobile[0], {
+    t: '2026-07-06T14:00:00Z', score: 47, fcp: 2100, lcp: 4200, tbt: 890, cls: 0.12, si: 5300
+  });
   assert.equal(s.updatedAt, '2026-07-06T14:00:00Z');
 });
 

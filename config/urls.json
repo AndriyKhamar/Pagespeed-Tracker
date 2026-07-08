@@ -1,6 +1,6 @@
 {
   "urls": [
-    { "url": "https://xq-booking-uat.newshore.es/" }
+    { "url": "https://xq-booking-uat.newshore.es/", "label": "UAT Environment" }
   ],
   "thresholds": { "mobile": 50, "desktop": 66 }
 }

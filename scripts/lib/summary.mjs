@@ -1,9 +1,12 @@
-export function emptySummary(url, slug, thresholds) {
-  return { url, slug, updatedAt: null, series: { mobile: [], desktop: [] }, thresholds };
+export function emptySummary(url, slug, thresholds, label = null) {
+  return { url, slug, label, updatedAt: null, series: { mobile: [], desktop: [] }, thresholds };
 }
 
 export function appendPoint(summary, run) {
-  const point = { t: run.fetchedAt, score: run.score, lcp: run.metrics.lcp, cls: run.metrics.cls, tbt: run.metrics.tbt };
+  const point = {
+    t: run.fetchedAt, score: run.score,
+    fcp: run.metrics.fcp, lcp: run.metrics.lcp, tbt: run.metrics.tbt, cls: run.metrics.cls, si: run.metrics.si
+  };
   if (!summary.series[run.strategy]) summary.series[run.strategy] = [];
   summary.series[run.strategy].push(point);
   summary.updatedAt = run.fetchedAt;
