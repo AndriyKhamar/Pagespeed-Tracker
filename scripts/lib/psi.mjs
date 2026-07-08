@@ -1,7 +1,8 @@
 const ENDPOINT = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
-export function buildPsiUrl(url, strategy) {
+export function buildPsiUrl(url, strategy, apiKey = process.env.PSI_API_KEY) {
   const p = new URLSearchParams({ url, strategy, category: 'performance' });
+  if (apiKey) p.set('key', apiKey);
   return `${ENDPOINT}?${p.toString()}`;
 }
 

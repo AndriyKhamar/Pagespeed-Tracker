@@ -22,6 +22,8 @@ jobs:
       - name: Validate config
         run: node scripts/validate-config.mjs
       - name: Collect PageSpeed data
+        env:
+          PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: node scripts/collect.mjs
       - name: Commit results
         run: |
