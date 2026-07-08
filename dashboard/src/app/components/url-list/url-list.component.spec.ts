@@ -11,3 +11,15 @@ describe('trendOf', () => {
     expect(UrlListComponent.trendOf([])).toBe('flat');
   });
 });
+
+describe('titleFor', () => {
+  it('uses the label when present', () => {
+    expect(UrlListComponent.titleFor({ url: 'https://a.com/', label: 'UAT Environment' })).toBe('UAT Environment');
+  });
+  it('falls back to the hostname when label is null', () => {
+    expect(UrlListComponent.titleFor({ url: 'https://xq-booking-uat.newshore.es/', label: null })).toBe('xq-booking-uat.newshore.es');
+  });
+  it('strips protocol and trailing slash for the hostname fallback', () => {
+    expect(UrlListComponent.titleFor({ url: 'http://example.com/path/', label: null })).toBe('example.com/path');
+  });
+});
