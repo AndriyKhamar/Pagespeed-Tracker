@@ -7,7 +7,7 @@ export async function fetchPsiRun(url, strategy, { fetchedAt, fetchFn = fetch, s
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const res = await fetchFn(buildPsiUrl(url, strategy));
-      if (!res.ok) throw new Error(`PSI HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`PSI HTTP ${res.status}: ${await res.text()}`);
       const json = await res.json();
       return parsePsi(json, { url, strategy, fetchedAt });
     } catch (err) {
