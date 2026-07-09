@@ -23,6 +23,17 @@ const CAPTIONS: Record<MetricKey, string> = {
 export function chartTitle(metric: MetricKey): string { return TITLES[metric]; }
 export function metricCaption(metric: MetricKey): string { return CAPTIONS[metric]; }
 
+// Same units/rounding convention as metricValueFor (url-detail.component.ts), for a mean instead of a single point.
+export function formatMetricAverage(metric: MetricKey, mean: number): string {
+  switch (metric) {
+    case 'score': return String(Math.round(mean));
+    case 'cls': return mean.toFixed(2);
+    case 'tbt': return `${Math.round(mean)} ms`;
+    case 'fcp': case 'lcp': case 'si': return `${(mean / 1000).toFixed(1)} s`;
+    default: return String(Math.round(mean));
+  }
+}
+
 @Component({
   selector: 'app-metric-chart',
   standalone: true,
@@ -40,6 +51,13 @@ export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy
 
   chartTitle = chartTitle;
   metricCaption = metricCaption;
+
+  avg(points: SeriesPoint[]): string {
+    const values = points.map((p) => (p as any)[this.metric]).filter((v) => v != null);
+    if (!values.length) return '—';
+    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    return formatMetricAverage(this.metric, mean);
+  }
 
   private zone = inject(NgZone);
   private resizeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -119,8 +137,16 @@ export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy
             type: 'linear',
             min: winStart, max: winEnd,
             grid: { display: false },
+            afterBuildTicks: (axis) => {
+              // One tick per day, evenly spaced 24h apart, ending exactly on today —
+              // Chart.js's auto tick placement otherwise snaps to "nice" calendar dates,
+              // which reads as uneven spacing near the window edges.
+              axis.ticks = Array.from({ length: WINDOW_DAYS }, (_, i) => ({
+                value: winEnd - (WINDOW_DAYS - 1 - i) * DAY_MS
+              }));
+            },
             ticks: {
-              maxTicksLimit: 8, maxRotation: 0,
+              autoSkip: false, maxRotation: 0, font: { size: 10 },
               callback: (value) => dayLabel(value as number)
             }
           },
@@ -135,6 +161,7 @@ export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy
 }
 
 const WINDOW_DAYS = 15;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function dayLabel(epochMs: number): string {
   const d = new Date(epochMs);

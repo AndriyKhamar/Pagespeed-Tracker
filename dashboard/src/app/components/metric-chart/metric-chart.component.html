@@ -3,7 +3,19 @@
     <div class="chart-title">{{ chartTitle(metric) }}</div>
     <div class="chart-note">data collected hourly</div>
   </div>
-  <div class="chart-canvas-wrap"><canvas #canvas></canvas></div>
+  <div class="chart-body">
+    <div class="chart-canvas-wrap"><canvas #canvas></canvas></div>
+    <div class="chart-stats">
+      <div class="stat-tile stat-mobile" *ngIf="mobile.length">
+        <div class="stat-label"><span class="swatch swatch-mobile"></span>mobile avg</div>
+        <div class="stat-value">{{ avg(mobile) }}</div>
+      </div>
+      <div class="stat-tile stat-desktop" *ngIf="desktop.length">
+        <div class="stat-label"><span class="swatch swatch-desktop"></span>desktop avg</div>
+        <div class="stat-value">{{ avg(desktop) }}</div>
+      </div>
+    </div>
+  </div>
   <div class="chart-legend">
     <span *ngIf="mobile.length"><span class="swatch swatch-mobile"></span>mobile</span>
     <span *ngIf="desktop.length"><span class="swatch swatch-desktop"></span>desktop</span>
