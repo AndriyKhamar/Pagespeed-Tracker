@@ -8,6 +8,8 @@ import { fetchPsiRun } from './lib/fetchPsi.mjs';
 import { emptySummary, appendPoint, pruneSummary } from './lib/summary.mjs';
 import { pruneRunFiles } from './lib/prune.mjs';
 import { validateConfig } from './lib/validateConfig.mjs';
+import { shouldAlert } from './lib/alert.mjs';
+import { alertText, postSlack } from './lib/slack.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = join(root, 'docs', 'data');
@@ -28,6 +30,11 @@ async function main() {
   const start = windowStart(now);
   const slugs = [];
 
+  // Slack alerting is opt-in: no webhook configured → collection runs exactly as before.
+  const webhook = process.env.SLACK_WEBHOOK_URL;
+  const dashboardUrl = process.env.DASHBOARD_URL;
+  const today = fetchedAt.slice(0, 10); // YYYY-MM-DD; debounce is once-per-day per url+strategy
+
   for (const { url, label } of cfg.urls) {
     const slug = slugify(url);
     slugs.push(slug);
@@ -35,6 +42,7 @@ async function main() {
     const summary = await readJson(summaryPath, emptySummary(url, slug, cfg.thresholds, label ?? null));
     summary.thresholds = cfg.thresholds;
     summary.label = label ?? null;
+    summary.lastAlert ??= {}; // summaries created before alerting existed have no lastAlert
 
     for (const strategy of STRATEGIES) {
       try {
@@ -47,6 +55,17 @@ async function main() {
         const files = await readdir(runDir);
         for (const f of pruneRunFiles(files, start)) await rm(join(runDir, f));
         console.log(`OK ${slug} ${strategy} score=${run.score}`);
+
+        const threshold = cfg.thresholds[strategy];
+        if (webhook && shouldAlert({ score: run.score, threshold, lastDate: summary.lastAlert[strategy], today })) {
+          try {
+            await postSlack(webhook, alertText({ label: summary.label, url, strategy, score: run.score, threshold, dashboardUrl }));
+            summary.lastAlert[strategy] = today;
+            console.log(`ALERT ${slug} ${strategy} ${run.score}<${threshold}`);
+          } catch (err) {
+            console.warn(`ALERT FAIL ${slug} ${strategy}: ${err.message}`);
+          }
+        }
       } catch (err) {
         console.warn(`SKIP ${slug} ${strategy}: ${err.message}`);
       }
