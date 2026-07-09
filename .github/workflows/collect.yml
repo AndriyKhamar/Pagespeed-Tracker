@@ -24,6 +24,8 @@ jobs:
       - name: Collect PageSpeed data
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DASHBOARD_URL: https://andriykhamar.github.io/Pagespeed-Tracker/
         run: node scripts/collect.mjs
       - name: Commit results
         run: |

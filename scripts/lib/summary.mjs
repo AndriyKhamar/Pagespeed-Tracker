@@ -1,5 +1,5 @@
 export function emptySummary(url, slug, thresholds, label = null) {
-  return { url, slug, label, updatedAt: null, series: { mobile: [], desktop: [] }, thresholds };
+  return { url, slug, label, updatedAt: null, series: { mobile: [], desktop: [] }, thresholds, lastAlert: {} };
 }
 
 export function appendPoint(summary, run) {
