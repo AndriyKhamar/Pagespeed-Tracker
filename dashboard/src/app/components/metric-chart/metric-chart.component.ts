@@ -160,7 +160,7 @@ export class MetricChartComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 }
 
-const WINDOW_DAYS = 15;
+const WINDOW_DAYS = 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function dayLabel(epochMs: number): string {
