@@ -1,0 +1,14 @@
+{
+  "url": "https://xq-booking-uat.newshore.es/",
+  "strategy": "desktop",
+  "fetchedAt": "2026-07-19T01:43:22Z",
+  "score": 79,
+  "metrics": {
+    "lcp": 1788.4962808679961,
+    "cls": 0.01451991966771156,
+    "tbt": 207.50000000000045,
+    "fcp": 530.4874219860731,
+    "si": 2737.4995418209382
+  },
+  "lighthouseVersion": "13.4.0"
+}
