@@ -1,0 +1,14 @@
+{
+  "url": "https://www.sunexpress.com/",
+  "strategy": "desktop",
+  "fetchedAt": "2026-08-15T15:10:08Z",
+  "score": 70,
+  "metrics": {
+    "lcp": 2121.676531950086,
+    "cls": 0.018254401622046074,
+    "tbt": 364.5,
+    "fcp": 843.1746181957209,
+    "si": 1918.6346326326227
+  },
+  "lighthouseVersion": "13.4.1"
+}
