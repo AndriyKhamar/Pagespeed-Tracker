@@ -1,0 +1,14 @@
+{
+  "url": "https://xq-booking-int2.newshore.es/",
+  "strategy": "desktop",
+  "fetchedAt": "2026-08-21T07:34:12Z",
+  "score": 57,
+  "metrics": {
+    "lcp": 2067.649998445653,
+    "cls": 0.04308869232608176,
+    "tbt": 652.5,
+    "fcp": 570.1485550346426,
+    "si": 3226.987564096773
+  },
+  "lighthouseVersion": "13.4.1"
+}
