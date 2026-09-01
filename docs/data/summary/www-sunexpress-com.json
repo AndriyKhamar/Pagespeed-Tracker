@@ -2,7 +2,7 @@
   "url": "https://www.sunexpress.com/",
   "slug": "www-sunexpress-com",
   "label": "PROD Environment",
-  "updatedAt": "2026-09-01T00:11:01Z",
+  "updatedAt": "2026-09-01T05:51:43Z",
   "series": {
     "mobile": [
       {
@@ -4540,6 +4540,15 @@
         "tbt": 801.5,
         "cls": 0.2729420451508794,
         "si": 6939.740050986944
+      },
+      {
+        "t": "2026-09-01T05:51:43Z",
+        "score": 38,
+        "fcp": 3677.010596574686,
+        "lcp": 11815.010596574686,
+        "tbt": 868,
+        "cls": 0.07735945718743156,
+        "si": 8602.900987974983
       }
     ],
     "desktop": [
