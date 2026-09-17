@@ -2,7 +2,7 @@
   "url": "https://xq-booking-int2.newshore.es/",
   "slug": "xq-booking-int2-newshore-es",
   "label": "INT2 Environment",
-  "updatedAt": "2026-09-17T17:51:23Z",
+  "updatedAt": "2026-09-17T20:44:01Z",
   "series": {
     "mobile": [
       {
@@ -10959,6 +10959,15 @@
         "tbt": 523.9999999999998,
         "cls": 0,
         "si": 2156.3741268282874
+      },
+      {
+        "t": "2026-09-17T20:44:01Z",
+        "score": 71,
+        "fcp": 651.863551945127,
+        "lcp": 2377.235551044691,
+        "tbt": 216.5,
+        "cls": 0.04308869232608176,
+        "si": 3995.149778830081
       }
     ]
   },
