@@ -1,7 +1,7 @@
 {
   "url": "https://xq-booking-uat.newshore.es/",
   "slug": "xq-booking-uat-newshore-es",
-  "updatedAt": "2026-09-17T23:14:49Z",
+  "updatedAt": "2026-09-18T02:07:50Z",
   "series": {
     "mobile": [
       {
@@ -5529,6 +5529,15 @@
         "tbt": 1039.5,
         "cls": 0.004981354989778025,
         "si": 10715.994091736013
+      },
+      {
+        "t": "2026-09-18T02:07:50Z",
+        "score": 45,
+        "fcp": 2021.5755177767721,
+        "lcp": 8285.587761889105,
+        "tbt": 847,
+        "cls": 0.004950126271974038,
+        "si": 10746.456371236402
       }
     ],
     "desktop": [
@@ -11111,7 +11120,7 @@
   },
   "label": "UAT Environment",
   "lastAlert": {
-    "mobile": "2026-09-17",
+    "mobile": "2026-09-18",
     "desktop": "2026-09-17"
   }
 }
